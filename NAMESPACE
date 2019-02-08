@@ -1,0 +1,6 @@
+exportPattern("^[[:alpha:]]+")
+import("vars","xts","lmtest","sandwich")
+importFrom("graphics", "abline", "lines", "plot")
+importFrom("stats", "coef", "cor", "cov", "embed", "lm", "pchisq",
+               "pf", "plot.ts", "pnorm", "resid")
+importFrom("utils", "tail", "write.csv")

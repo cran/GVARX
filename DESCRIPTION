@@ -1,0 +1,18 @@
+Package: GVARX
+Type: Package
+Title: Perform Stationary Global Vector Autoregression Estimation and
+        Inference
+Version: 1.1
+Date: 2019-02-05
+Author: Ho Tsung-wu
+Maintainer: Ho Tsung-wu <tsungwu@ntnu.edu.tw>
+Description: Perform the estimation and inference of stationary Global Vector Autoregression model (GVAR) of Pesaran, Schuermann and Weiner (2004) <DOI:10.1198/073500104000000019> and Dees, di Mauro, Pesaran and Smith (2007) <DOI:10.1002/jae.932>.
+License: GPL (>= 2)
+LazyData: TRUE
+LazyLoad: yes
+Depends: R (>= 2.10),vars,xts
+Imports: lmtest, lubridate, urca, sandwich, strucchange
+NeedsCompilation: no
+Packaged: 2019-02-04 06:26:08 UTC; tsungwu
+Repository: CRAN
+Date/Publication: 2019-02-08 15:53:28 UTC
