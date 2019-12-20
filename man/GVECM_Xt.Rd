@@ -1,5 +1,5 @@
-\name{GVAR_Xt}
-\alias{GVAR_Xt}
+\name{GVECM_Xt}
+\alias{GVECM_Xt}
 
 \title{Compute the G0, G1, G2, and F1, F2 matrices for filtering Xt
 }
@@ -8,7 +8,7 @@
 
 \description{Compute the G0, G1, G2, and F1, F2 matrices for filtering Xt}
 
-\usage{GVAR_Xt(data,p, type="const",ic="AIC",weight.matrix)
+\usage{GVECM_Xt(data,p,type="const",ic="AIC",weight.matrix)
 }
 
 \arguments{
@@ -42,8 +42,7 @@ Information criteria for optimal lag.As in package vars, we have four selection:
   \item{G2}{Matrix G2 of Eq.(2.6) in Filippo and Pesaran(2013, P.17)}
   \item{F1}{Matrix F1 of Eq.(2.6) in Filippo and Pesaran(2013, P.17)}
   \item{F2}{Matrix F2 of Eq.(2.6) in Filippo and Pesaran(2013, P.17)}
-  \item{lagmatrix}{Country-secific optimal lag number, which must be the same.}
-  \item{RESID}{original residuals=u in Filippo and Pesaran (2013, P.17)}
+  \item{lagmatrix}{Country-secific optimal lag number.}
   \item{newRESID}{New residuals=epsilon in Filippo and Pesaran (2013, P.17)}
 }
 
@@ -63,14 +62,13 @@ p=2
 type="const"
 ic="SC"
 
-Result=GVAR_Xt(data=PriceVol,p,type,ic, weight.matrix=tradeweight1)
+Result=GVECM_Xt(data=PriceVol,p,type,ic, weight.matrix=tradeweight1)
 Result$G0
 Result$G1
-Result$G2
 Result$F1
+Result$G2
 Result$F2
 Result$lagmatrix
-Result$RESID
 Result$newRESID
 
 }

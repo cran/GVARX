@@ -1,4 +1,4 @@
-GVAR_Xt <- function(data,p, type="const",ic="AIC",weight.matrix){
+GVECM_Xt <- function(data,p,type="const",ic="AIC",weight.matrix){
   ID<-NULL
   type=type
 ic=ic
@@ -11,9 +11,9 @@ dat1=data[,-timeCol] #Data with ID column only
 endo.no=ncol(dat1)-1 #names of column variables
 N=length(unique(dat1[,idCol])) #Number of countries
 weight.matrix=weight.matrix
+p=p
 FLag=p+1
-lag.max=NULL
-myout= GVARest(data=data,p,FLag,lag.max=NULL, type=type,ic=ic, weight.matrix)
+myout= GVECMest(data,p,FLag,lag.max=NULL, ic,type = "const",weight.matrix=weight.matrix)
 
 
 pmatrix=myout$lagmatrix[,2]
@@ -37,7 +37,7 @@ if (is.list(weight.matrix)) {
       } else {weight.matrix=as.matrix(weight.matrix)}
 
   for (jj in 1:N) {
-  rsd_tmp=resid(myout$gvar[[jj]])
+  rsd_tmp=resid(myout$gvecm[[jj]])
   diff_jj=max(pmatrix)-(pmatrix[jj])
     if (diff_jj==0) { rsd_tmp1=rsd_tmp}  else {rsd_tmp1=rsd_tmp[-(1:diff_jj),]}
 
@@ -49,7 +49,7 @@ if (is.list(weight.matrix)) {
   endo_lagk1=NULL
   endo_lagk2=NULL
   for (k in 1:endo.no)  {
-  coeff=coef(myout$gvar[[jj]])[[k]]
+  coeff=coef(myout$gvecm[[jj]])[[k]]
   exo_no=myout$exoLag*endo.no
   coeff_EXO=coeff[(which(rownames(coeff)=="const")+1):nrow(coeff),]
   coeff_EXO_LAG0=coeff_EXO[1:endo.no,1]
@@ -89,7 +89,6 @@ F1=invGO%*%G1
 newRESID=t(invGO%*%t(RESID))
 
 varnames=colnames(dat1)[-1]
-
 NAME=myout$NAMES
 
 dataNT=vnames=NULL
@@ -127,7 +126,7 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
   for (jj in 1:N) {
 
     #Collect residuals
-    rsd_tmp=resid(myout$gvar[[jj]])
+    rsd_tmp=resid(myout$gvecm[[jj]])
     diff_jj=max(pmatrix)-(pmatrix[jj])
     if (diff_jj==0) {rsd_tmp1=rsd_tmp } else {rsd_tmp1=rsd_tmp[-(1:diff_jj),]}
 
@@ -137,7 +136,7 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
 
     endo_lagk0=endo_lagk1=endo_lagk2=NULL
     for (k in 1:endo.no) {
-      coeff=coef(myout$gvar[[jj]])[[k]]
+      coeff=coef(myout$gvecm[[jj]])[[k]]
       exo_no=myout$exoLag*endo.no
       coeff_EXO=coeff[(which(rownames(coeff)=="const")+1):nrow(coeff),]
       coeff_EXO_LAG0=coeff_EXO[1:endo.no,1]
@@ -196,6 +195,7 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
   newRESID=t(invGO %*% t(RESID))
   varnames=colnames(dat1)[-1]
   NAME=myout$NAMES
+
   dataNT=NULL;vnames=NULL
   for (j in 1:N) {
     dat=subset(dat1,ID==NAME[j])

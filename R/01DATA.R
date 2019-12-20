@@ -1,5 +1,6 @@
 GVAR_Ft <- function (data, weight.matrix=NULL)  {
 
+ID<-NULL
 NAME=unique(as.character(data[,"ID"]))
 timeCol=which(names(data)=="Time")
 idCol=which(names(data)=="ID")
@@ -42,18 +43,12 @@ for (i in 1:N) {
         }
  exo=cbind(exo, F.tmp) # Foreign variables
  }
-
  h=NAME[i]  # index number of home country
-# y=subset(data,ID==h);
-# varnames=c("ID","Time",paste0(h,".",variates))
-# colnames(y)=varnames
- ID=subset(data,ID==h)[,"ID"]
- exo=data.frame(ID,exo)
-exoNAMES=c("ID",paste0(h,variates,"_FL0"))
-colnames(exo)=exoNAMES
 
-#dat_i=cbind(y,exo)[,-1]
-#newData[[i]]=dat_i
+exoNAMES=paste0(h,variates,"_FL0")
+
+ colnames(exo)=exoNAMES
+
 Ft[[i]]=exo
 }
 

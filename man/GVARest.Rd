@@ -12,7 +12,7 @@
 }
 
 \arguments{
-  \item{data}{Dataframe is a strictly balanced panel data format, the first column is cross-section ID, and the second column is timeID. For the sake of identification, both columns must be named by, respectively, ID and timeID.
+  \item{data}{Dataframe is a strictly balanced panel data format,the first column is cross-section ID,and the second column is Time. For the sake of identification, both columns must be named by, respectively, id and Time.
 }
 
  \item{p}{The number of lag for Xt matrix.

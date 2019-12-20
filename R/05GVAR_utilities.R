@@ -91,9 +91,12 @@ p=p
     }
   call <- match.call()
   if("season" %in% names(call)) call$season <- eval(season)
-result <- list(varresult = equation, NWHAC=NW, datamat = data.frame(cbind(yend, rhs)), y = y.orig, type = type, p = p, K = K, obs = sample, totobs = sample + p, restrictions = NULL, call = call)
+result <- list(varresult = equation, datamat = data.frame(cbind(yend, rhs)), y = y.orig, type = type, p = p, K = K, obs = sample, totobs = sample + p, restrictions = NULL, call = call, NWHAC=NW)
+#result <- list(varresult = equation, datamat = data.frame(cbind(yend, rhs)), y = y.orig, type = type, p = p, K = K, obs = sample, totobs = sample + p, restrictions = NULL, call = call)
+
     class(result) <- "varest"
     return(result)
+
 }
 
 

@@ -15,7 +15,7 @@
 
 \arguments{
   \item{data}{
-  Dataframe is a strictly balanced panel data format,the first column is cross-section ID,and the second column is timeID. For the sake of identification, both columns must be named by, respectively, ID and timeID.
+  Dataframe is a strictly balanced panel data format,the first column is cross-section ID,and the second column is Time. For the sake of identification, both columns must be named by, respectively, id and Time.
 }
  \item{weight.matrix}{
 Bilateral trade weight matrix for computing foreign variables. If the computation of foreign variables are weighted by one weighting matrix, weight.matrix must be a "data.frame". If the computation of foreign variables are weighted on a year-to-year basis, then weight.matrix must be a "list", with the same length as the weighting frequency. If NULL, then it computes the foreign vriables by average.

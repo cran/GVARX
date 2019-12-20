@@ -1,15 +1,10 @@
-GVARest <- function (data,p=1,FLag, lag.max, type="const", ic,weight.matrix=NULL){
-
+GVARest <- function (data,p=2,FLag, lag.max=NULL, type="const", ic,weight.matrix=NULL){
+  ID<-NULL
 p=p
 type=type
-weight=weight.matrix
 
-ID="ID"
-Time="Time"
-
-idCol=which(colnames(data) == ID)
-timeCol=which(colnames(data)==Time)
-
+idCol=which(colnames(data) == "ID")
+timeCol=which(colnames(data)=="Time")
 
 variates=colnames(data[,-c(idCol,timeCol)]) #names of column variables
 dat=as.data.frame(data[,-timeCol]) #Data with ID column only
@@ -20,69 +15,20 @@ N=length(NAME) #number of countries
 timeID=as.character(subset(data, ID==NAME[1])[,timeCol])
 Year=unique(as.character(lubridate::year(timeID)))
 
-output1=list()
-output2=list()
-output3=list()
-outRSD=list()
-outputP=NULL
-outputP1=NULL
+output1=output2=output3=outRSD=list()
+outputP=outputP1=NULL
 
-#Compute Ft
-Ft=list()
-for (i in 1:N)  {
-h=NAME[i]  # index number of home country
-# plag=exolag
+Ft=GVAR_Ft(data,weight.matrix=weight.matrix)
 
-  exo.tmp=NULL  # Compute Exogenous Foreign Variables
-
-
-     for (j in 2:(length(variates)+1)) {
-
-        if (is.null(weight)){
-
-          F.tmp=apply(matrix(dat[,j], ,N),1,mean)
-
-        }
-       if (isTRUE(is.matrix(weight.matrix))) {
-         dimnames(weight)=NULL
-         varMatrix=matrix(dat[,j], ,N)
-         F.tmp=varMatrix %*% as.matrix(weight[,i])
-
-
-       }
-      else {
-         dat_matrix=matrix(dat[,j], ,N)
-         varMatrix=as.xts(dat_matrix,as.Date(timeID))
-
-         F.tmp=NULL
-         for (k in 1:length(Year)) {
-           tmp1.matrix=varMatrix[Year[k]]
-           tmp2.matrix=as.matrix(weight[[k]])
-           rownames(tmp1.matrix)=NULL
-           dimnames(tmp2.matrix)=NULL
-           F.tmp0=tmp1.matrix %*% tmp2.matrix[,i]
-           F.tmp=rbind(F.tmp,F.tmp0)
-        }
-
-       }
-
-        exo.tmp = cbind(exo.tmp,F.tmp)
- } # End of j loop, by variables
-
-exoNAMES=paste0(h,variates,"_FL0")
-colnames(exo.tmp)=exoNAMES
-  Ft[[i]]<- exo.tmp
-
-
-  exolag=FLag
-  exo=embed(exo.tmp,exolag)   # Foreign variables
-  ytmp=subset(dat,ID==h)[,-1];
-  varnames=paste(h,paste(".",variates,sep=""),sep="")
+for (i in 1:N) {
+  exo=embed(Ft[[i]],FLag)   # Foreign variables
+  ytmp=subset(data,ID==NAME[i])[,-c(1:2)];
+  varnames=paste(NAME[i],paste(".",variates,sep=""),sep="")
   colnames(ytmp)=varnames
-  y=ytmp[-c(1:(exolag-1)),]
+  y=ytmp[-c(1:(FLag-1)),]
 
   exoNAMES=NULL
-  for (j in 1:exolag) {
+  for (j in 1:FLag) {
   exoNAMES=c(exoNAMES,paste("F.",variates,".Lag",j-1,sep=""))
   }
 
@@ -123,7 +69,6 @@ maxlag1=max(outputP1)
 gvarRSD=NULL;varRSD=NULL
 for (i in 1:N)  {
 
-#h=NAME[i]  # index number of home country
 ##== Compute GVAR residuals
 thislag=outputP[i]
 rmobs=maxlag-thislag
@@ -140,7 +85,7 @@ varRSD=cbind(varRSD,varrsd)
 
 }  ## end of 2nd i country loop
 
-results <- list(gvar=output1,White=output2,NWHAC=output3,p=temp.out$p,K=temp.out$K,type=temp.out$type,datamat=data,lagmatrix =lagmatrix,lagmatrix1 =lagmatrix1, exoLag=exolag,Ft= Ft,NAMES=NAME,gvarRSD=gvarRSD,varRSD=varRSD,weight=weight)
+results <- list(gvar=output1,White=output2,NWHAC=output3,p=temp.out$p,K=temp.out$K,type=temp.out$type,datamat=data,lagmatrix =lagmatrix,lagmatrix1 =lagmatrix1, exoLag=FLag,Ft= Ft,NAMES=NAME,gvarRSD=gvarRSD,varRSD=varRSD)
 
 return(results)
 
@@ -151,45 +96,45 @@ return(results)
 
 
 
-.GVARirf <- function (Obj, impulse, response,ortho,cumulative,boot,ci = 0.95,n.ahead=15, Weights,shockNeg=FALSE,STD=FALSE,G=FALSE) {
+#.GVARirf <- function (Obj, impulse, response,ortho,cumulative,boot,ci = 0.95,n.ahead=15, Weights,shockNeg=FALSE,STD=FALSE,G=FALSE) {
 
-DATA=GVAR_Xt(data=Obj$datamat,p=Obj$p, lag.max=15, weight.matrix=Obj$weight,ic="AIC")
+#DATA=GVAR_Xt(data=Obj$datamat,p=Obj$p, weight.matrix=Obj$weight,ic="AIC")
 
-type=Obj$type
-out2=vars::VAR(DATA$Xt,p=2,type=type,lag.max =5,ic="SC")
+#type=Obj$type
+#out2=vars::VAR(DATA$Xt,p=2,type=type,lag.max =5,ic="SC")
 
 
-myIRF1=irf(out2, impulse =impulse , response=response,ortho = ortho,cumulative = cumulative,boot=boot,ci = 0.95,n.ahead=15,shockNeg=shockNeg,STD=STD)
+#myIRF1=irf(out2, impulse =impulse , response=response,ortho = ortho,cumulative = cumulative,boot=boot,ci = 0.95,n.ahead=15,shockNeg=shockNeg,STD=STD)
 
-if (G==TRUE)
-{
+#if (G==TRUE)
+#{
 
-  if (is.null(Weights))
-  {
-  y=apply(as.data.frame(myIRF1[[1]]),1,mean)
-  Low=apply(as.data.frame(myIRF1[[2]]),1,mean)
-  Up=apply(as.data.frame(myIRF1[[3]]),1,mean)
-  dat=cbind(y,Low,Up)
-  plot.ts(y,ylim=c(min(dat),max(dat)),col=4);abline(h=0)
-  lines(Low,lwd=0.1,lty=4,col=2)
-  lines(Up,lwd=0.1,lty=4,col=2)
-  }
-  else {
-  yw=as.matrix(as.data.frame(myIRF1[[1]]))%*%Weights
-  Loww=as.matrix(as.data.frame(myIRF1[[2]]))%*%Weights
-  Upw=as.matrix(as.data.frame(myIRF1[[3]]))%*%Weights
-  datw=cbind(yw,Loww,Upw)
-  plot.ts(yw,ylim=c(min(datw),max(datw)),col=4);abline(h=0)
-  lines(Loww,lwd=0.1,lty=4,col=2)
-  lines(Upw,lwd=0.1,lty=4,col=2)
-  }
-print(myIRF1)
-} ## boot endif
-else {print(myIRF1);plot(myIRF1)}
-print(out2$p)
-return(result=out2)
+#  if (is.null(Weights))
+#  {
+#  y=apply(as.data.frame(myIRF1[[1]]),1,mean)
+#  Low=apply(as.data.frame(myIRF1[[2]]),1,mean)
+#  Up=apply(as.data.frame(myIRF1[[3]]),1,mean)
+#  dat=cbind(y,Low,Up)
+#  plot.ts(y,ylim=c(min(dat),max(dat)),col=4);abline(h=0)
+#  lines(Low,lwd=0.1,lty=4,col=2)
+#  lines(Up,lwd=0.1,lty=4,col=2)
+#  }
+#  else {
+#  yw=as.matrix(as.data.frame(myIRF1[[1]]))%*%Weights
+#  Loww=as.matrix(as.data.frame(myIRF1[[2]]))%*%Weights
+#  Upw=as.matrix(as.data.frame(myIRF1[[3]]))%*%Weights
+#  datw=cbind(yw,Loww,Upw)
+#  plot.ts(yw,ylim=c(min(datw),max(datw)),col=4);abline(h=0)
+#  lines(Loww,lwd=0.1,lty=4,col=2)
+#  lines(Upw,lwd=0.1,lty=4,col=2)
+#  }
+#print(myIRF1)
+#} ## boot endif
+#else {print(myIRF1);plot(myIRF1)}
+#print(out2$p)
+#return(result=out2)
 
-}  ## end of irf function
+#}  ## end of irf function
 
 
 
