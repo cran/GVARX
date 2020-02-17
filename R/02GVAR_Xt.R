@@ -1,5 +1,6 @@
-GVAR_Xt <- function(data,p, type="const",ic="AIC",weight.matrix){
-  ID<-NULL
+GVAR_Xt <- function(data,p=2,type="const",ic="AIC",weight.matrix=NULL){
+#data=Data;type="const";ic="AIC";p=1;FLag=2;lag.max=NULL
+ID <- NULL
   type=type
 ic=ic
 
@@ -30,12 +31,12 @@ RESID=NULL
 if (p==1) {
 if (is.list(weight.matrix)) {
   AVG=matrix(rep(0,N^2),N,N)
-    for (i in 1:length(weight.matrix)){
+    for (i in 1:length(weight.matrix)){ 
       AVG=AVG+as.matrix(weight.matrix[[i]])
       }
       weight.matrix=AVG/(length(weight.matrix)-1)
       } else {weight.matrix=as.matrix(weight.matrix)}
-
+  
   for (jj in 1:N) {
   rsd_tmp=resid(myout$gvar[[jj]])
   diff_jj=max(pmatrix)-(pmatrix[jj])
@@ -51,8 +52,13 @@ if (is.list(weight.matrix)) {
   for (k in 1:endo.no)  {
   coeff=coef(myout$gvar[[jj]])[[k]]
   exo_no=myout$exoLag*endo.no
-  coeff_EXO=coeff[(which(rownames(coeff)=="const")+1):nrow(coeff),]
-  coeff_EXO_LAG0=coeff_EXO[1:endo.no,1]
+if (myout$type=="const") {
+    coeff_EXO=coeff[(which(rownames(coeff)=="const")+1):nrow(coeff),]
+} else if (myout$type %in%  c("trend","both")) {
+  coeff_EXO=coeff[(which(rownames(coeff)=="trend")+1):nrow(coeff),]
+} else {coeff_EXO=coeff[(endo.no*p+1):nrow(coeff),]}
+  
+    coeff_EXO_LAG0=coeff_EXO[1:endo.no,1]
 
      exo_lagi0=NULL;exo_lagk1=NULL
      for (i in 1:endo.no)
@@ -89,7 +95,6 @@ F1=invGO%*%G1
 newRESID=t(invGO%*%t(RESID))
 
 varnames=colnames(dat1)[-1]
-
 NAME=myout$NAMES
 
 dataNT=vnames=NULL
@@ -101,7 +106,6 @@ datz=as.matrix(dat[,-1])
 dataNT=cbind(dataNT,datz)
 }
 colnames(dataNT)=vnames
-colnames(newRESID)=vnames
 
 ##== Recursive Procedure
 #myXt_tmp1=.GVARfilter(dataNT,p=1,Bcoef=F1)
@@ -109,6 +113,7 @@ colnames(newRESID)=vnames
 #t1=nrow(myXt1);t_rsd=nrow(newRESID)
 #Xt1=myXt1[-(1:(t1-t_rsd)),]+newRESID
 #colnames(Xt1)=vnames
+colnames(newRESID)=vnames
 
 results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=newRESID)
 # end of if (p=1)
@@ -117,13 +122,13 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
 } else if (p>=2) {
   if (is.list(weight.matrix)) {
     AVG=matrix(rep(0,N^2),N,N)
-    for (i in 1:length(weight.matrix)){
+    for (i in 1:length(weight.matrix)){ 
       AVG=AVG+as.matrix(weight.matrix[[i]])
     }
     weight.matrix=AVG/(length(weight.matrix)-1)
-
+    
     } else {weight.matrix=as.matrix(weight.matrix)}
-
+  
   for (jj in 1:N) {
 
     #Collect residuals
@@ -139,7 +144,11 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
     for (k in 1:endo.no) {
       coeff=coef(myout$gvar[[jj]])[[k]]
       exo_no=myout$exoLag*endo.no
-      coeff_EXO=coeff[(which(rownames(coeff)=="const")+1):nrow(coeff),]
+      if (myout$type=="const") {
+        coeff_EXO=coeff[(which(rownames(coeff)=="const")+1):nrow(coeff),]
+      } else if (myout$type %in%  c("trend","both")) {
+        coeff_EXO=coeff[(which(rownames(coeff)=="trend")+1):nrow(coeff),]
+      } else {coeff_EXO=coeff[(endo.no*p+1):nrow(coeff),]}
       coeff_EXO_LAG0=coeff_EXO[1:endo.no,1]
 
       exo_lagi0=NULL
@@ -196,6 +205,7 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
   newRESID=t(invGO %*% t(RESID))
   varnames=colnames(dat1)[-1]
   NAME=myout$NAMES
+
   dataNT=NULL;vnames=NULL
   for (j in 1:N) {
     dat=subset(dat1,ID==NAME[j])
@@ -205,7 +215,6 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
     dataNT=cbind(dataNT,datz)
   }
   colnames(dataNT)=vnames
-  colnames(newRESID)=vnames
 
   ##== Recursive Procedure
 #  myXt_tmp1=.GVARfilter(dataNT,p=1,Bcoef=F1)
@@ -219,6 +228,7 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
 #  Xt2=myXt2[-(1:(t2-t_rsd)),]+newRESID
 #  colnames(Xt1)=vnames
 #  colnames(Xt2)=vnames
+  colnames(newRESID)=vnames
   results <-list(G0=G0,G1=G1,G2=G2, F1=F1,F2=F2,lagmatrix=myout$lagmatrix,RESID=RESID,newRESID=newRESID)
 
 } # if p=2
