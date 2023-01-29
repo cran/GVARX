@@ -166,3 +166,74 @@ function (y, lag.max = 10, type = c("const", "trend", "both",
     return(list(selection = order, criteria = criteria))
 }
 
+.GVAR.forecast = function(X, p, Bcoef, exogen = NULL, postpad = c("none", "constant", "zero", "NA"))
+{
+	X = as.matrix(X)
+	if(any(is.na(X))) stop("\nvarxfilter:-->error: NAs in X.\n")
+	if(ncol(X) < 2) stop("\nvarxfilter:-->error: The matrix 'X' should contain at least two variables.\n")
+	if(is.null(colnames(X))) colnames(X) = paste("X", 1:ncol(X), sep = "")
+	colnames(X) = make.names(colnames(X))
+	postpad = tolower(postpad[1])
+	if(any(colnames(Bcoef)=="const")){
+		constant = TRUE
+		ic = 1
+	} else{
+		constant = FALSE
+		ic = 0
+	}
+	obs = dim(X)[1]
+	K = dim(X)[2]
+	xsample = obs - p
+	Xlags = embed(X, dimension = p + 1)[, -(1:K)]
+	temp1 = NULL
+	for (i in 1:p) {
+		temp = paste(colnames(X), ".l", i, sep = "")
+		temp1 = c(temp1, temp)
+	}
+	colnames(Xlags) = temp1
+	Xend = X[-c(1:p), ]
+	if(constant){
+		rhs = cbind( Xlags, rep(1, xsample))
+		colnames(rhs) <- c(colnames(Xlags), "const")
+	} else{
+		rhs = Xlags
+		colnames(rhs) <- colnames(Xlags)
+	}
+	if( !(is.null(exogen)) ) {
+		exogen = as.matrix(exogen)
+		if (!identical(nrow(exogen), nrow(X))) {
+			stop("\nvarxfit:-->error: Different row size of X and exogen.\n")
+		}
+		XK = dim(exogen)[2]
+		if (is.null(colnames(exogen))) colnames(exogen) = paste("exo", 1:ncol(exogen), sep = "")
+		colnames(exogen) = make.names(colnames(exogen))
+		tmp  = colnames(rhs)
+		rhs =  cbind(rhs, exogen[-c(1:p), ])
+		colnames(rhs) = c(tmp, colnames(exogen))
+	} else{
+		XK = 0
+	}
+	datamat = as.matrix(rhs)
+	colnames(datamat) = colnames(rhs)
+	xfitted = t( Bcoef %*% t( datamat ) )
+	xresiduals = tail(X, obs - p) - xfitted
+	if(postpad!="none"){
+		if(postpad == "constant"){
+			# pre-pad values with the constant
+			xfitted = t( Bcoef %*% t( rbind(matrix(c(rep(0, p*K), if(constant) 1 else NULL, if(XK>0) rep(0, XK) else NULL), nrow = p, ncol=dim(Bcoef)[2], byrow = TRUE), datamat ) ) )
+			xresiduals = X - xfitted
+		} else if(postpad == "zero"){
+			xfitted = t( Bcoef %*% t( rbind(matrix(rep(0, dim(Bcoef)[2]), nrow = p, ncol=dim(Bcoef)[2], byrow = TRUE), datamat ) ) )
+			xresiduals = X - xfitted
+		} else if(postpad == "NA"){
+			xfitted = t( Bcoef %*% t( rbind(matrix(rep(NA, dim(Bcoef)[2]), nrow = p, ncol=dim(Bcoef)[2], byrow = TRUE), datamat ) ) )
+			xresiduals = X - xfitted
+		} else{
+			# do nothing
+			xfitted = t( Bcoef %*% t( datamat ) )
+			xresiduals = tail(X, obs - p) - xfitted
+		}
+	}
+	ans = list( Bcoef = Bcoef, xfitted = xfitted, xresiduals = xresiduals, lag = p, constant = constant)
+	return( ans )
+}

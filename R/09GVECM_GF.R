@@ -1,4 +1,4 @@
-GVECM_Xt <- function(data,p,type="const",ic="AIC",weight.matrix){
+GVECM_GF <- function(data,p,type="const",ic="AIC",weight.matrix){
   ID<-NULL
   type=type
 ic=ic
@@ -13,7 +13,7 @@ N=length(unique(dat1[,idCol])) #Number of countries
 weight.matrix=weight.matrix
 p=p
 FLag=p+1
-myout= GVECMest(data,p,FLag,lag.max=NULL, ic,type = "const",weight.matrix=weight.matrix)
+myout= GVECMest(data,p,lag.max=NULL, ic, type = "const",weight.matrix=weight.matrix)
 
 
 pmatrix=myout$lagmatrix[,2]
@@ -102,14 +102,13 @@ dataNT=cbind(dataNT,datz)
 colnames(dataNT)=vnames
 colnames(newRESID)=vnames
 
-##== Recursive Procedure
-#myXt_tmp1=.GVARfilter(dataNT,p=1,Bcoef=F1)
-#myXt1=myXt_tmp1$xfitted;
-#t1=nrow(myXt1);t_rsd=nrow(newRESID)
-#Xt1=myXt1[-(1:(t1-t_rsd)),]+newRESID
-#colnames(Xt1)=vnames
+##==Compute in-sample fitted value, or conditional mean
 
-results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=newRESID)
+removal=dim(dataNT)[1]-dim(newRESID)[1]
+dataNT=dataNT[-c(1:removal),]
+fitted=dataNT-newRESID
+rownames(dataNT)=rownames(fitted)=NULL
+results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=newRESID,fitted=fitted, data=dataNT)
 # end of if (p=1)
 
 
@@ -207,19 +206,13 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
   colnames(dataNT)=vnames
   colnames(newRESID)=vnames
 
-  ##== Recursive Procedure
-#  myXt_tmp1=.GVARfilter(dataNT,p=1,Bcoef=F1)
-#  myXt_tmp2=.GVARfilter(dataNT,p=2,Bcoef=cbind(F1,F2))
-#  myXt1=myXt_tmp1$xfitted
-#  myXt2=myXt_tmp2$xfitted
-#  t1=nrow(myXt1)
-#  t2=nrow(myXt2)
-#  t_rsd=nrow(newRESID)
-#  Xt1=myXt1[-(1:(t1-t_rsd)),]+newRESID
-#  Xt2=myXt2[-(1:(t2-t_rsd)),]+newRESID
-#  colnames(Xt1)=vnames
-#  colnames(Xt2)=vnames
-  results <-list(G0=G0,G1=G1,G2=G2, F1=F1,F2=F2,lagmatrix=myout$lagmatrix,RESID=RESID,newRESID=newRESID)
+  ##==Compute in-sample fitted value, or conditional mean
+  removal=dim(dataNT)[1]-dim(newRESID)[1]
+  dataNT=dataNT[-c(1:removal),]
+  fitted=dataNT-newRESID
+  rownames(dataNT)=rownames(fitted)=NULL
+
+  results <-list(G0=G0,G1=G1,G2=G2, F1=F1,F2=F2,lagmatrix=myout$lagmatrix,RESID=RESID,newRESID=newRESID,fitted=fitted, data=dataNT)
 
 } # if p=2
 

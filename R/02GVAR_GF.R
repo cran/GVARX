@@ -1,8 +1,10 @@
-GVAR_Xt <- function(data,p=2,type="const",ic="AIC",weight.matrix=NULL){
+GVAR_GF <- function(data,p=2,type="const",ic="AIC",weight.matrix) {
 #data=Data;type="const";ic="AIC";p=1;FLag=2;lag.max=NULL
 ID <- NULL
   type=type
 ic=ic
+FLag=p+1
+lag.max=NULL
 
 idCol=which(colnames(data) == "ID")
 timeCol=which(colnames(data)=="Time")
@@ -12,9 +14,7 @@ dat1=data[,-timeCol] #Data with ID column only
 endo.no=ncol(dat1)-1 #names of column variables
 N=length(unique(dat1[,idCol])) #Number of countries
 weight.matrix=weight.matrix
-FLag=p+1
-lag.max=NULL
-myout= GVARest(data=data,p,FLag,lag.max=NULL, type=type,ic=ic, weight.matrix)
+myout= GVARest(data=data,p,lag.max=NULL, type=type,ic=ic, weight.matrix)
 
 
 pmatrix=myout$lagmatrix[,2]
@@ -31,12 +31,12 @@ RESID=NULL
 if (p==1) {
 if (is.list(weight.matrix)) {
   AVG=matrix(rep(0,N^2),N,N)
-    for (i in 1:length(weight.matrix)){ 
+    for (i in 1:length(weight.matrix)){
       AVG=AVG+as.matrix(weight.matrix[[i]])
       }
       weight.matrix=AVG/(length(weight.matrix)-1)
       } else {weight.matrix=as.matrix(weight.matrix)}
-  
+
   for (jj in 1:N) {
   rsd_tmp=resid(myout$gvar[[jj]])
   diff_jj=max(pmatrix)-(pmatrix[jj])
@@ -57,7 +57,7 @@ if (myout$type=="const") {
 } else if (myout$type %in%  c("trend","both")) {
   coeff_EXO=coeff[(which(rownames(coeff)=="trend")+1):nrow(coeff),]
 } else {coeff_EXO=coeff[(endo.no*p+1):nrow(coeff),]}
-  
+
     coeff_EXO_LAG0=coeff_EXO[1:endo.no,1]
 
      exo_lagi0=NULL;exo_lagk1=NULL
@@ -108,27 +108,31 @@ dataNT=cbind(dataNT,datz)
 colnames(dataNT)=vnames
 
 ##== Recursive Procedure
-#myXt_tmp1=.GVARfilter(dataNT,p=1,Bcoef=F1)
+#myXt_tmp1=.GVAR_fitted(dataNT,p=1,Bcoef=F1)
 #myXt1=myXt_tmp1$xfitted;
 #t1=nrow(myXt1);t_rsd=nrow(newRESID)
 #Xt1=myXt1[-(1:(t1-t_rsd)),]+newRESID
 #colnames(Xt1)=vnames
 colnames(newRESID)=vnames
 
-results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=newRESID)
+removal=dim(dataNT)[1]-dim(newRESID)[1]
+dataNT=dataNT[-c(1:removal),]
+fitted=dataNT-newRESID
+rownames(dataNT)=rownames(fitted)=NULL
+results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=newRESID,fitted=fitted,data=dataNT)
 # end of if (p=1)
 
 
 } else if (p>=2) {
   if (is.list(weight.matrix)) {
     AVG=matrix(rep(0,N^2),N,N)
-    for (i in 1:length(weight.matrix)){ 
+    for (i in 1:length(weight.matrix)){
       AVG=AVG+as.matrix(weight.matrix[[i]])
     }
     weight.matrix=AVG/(length(weight.matrix)-1)
-    
+
     } else {weight.matrix=as.matrix(weight.matrix)}
-  
+
   for (jj in 1:N) {
 
     #Collect residuals
@@ -217,19 +221,23 @@ results <-list(lagmatrix=myout$lagmatrix,G0=G0,G1=G1,F1=F1,RESID=RESID,newRESID=
   colnames(dataNT)=vnames
 
   ##== Recursive Procedure
-#  myXt_tmp1=.GVARfilter(dataNT,p=1,Bcoef=F1)
-#  myXt_tmp2=.GVARfilter(dataNT,p=2,Bcoef=cbind(F1,F2))
+#  myXt_tmp1=.GVAR_fitted(dataNT,p=1,Bcoef=F1)
+#  myXt_tmp2=.GVAR_fitted(dataNT,p=2,Bcoef=cbind(F1,F2))
 #  myXt1=myXt_tmp1$xfitted
 #  myXt2=myXt_tmp2$xfitted
 #  t1=nrow(myXt1)
 #  t2=nrow(myXt2)
 #  t_rsd=nrow(newRESID)
-#  Xt1=myXt1[-(1:(t1-t_rsd)),]+newRESID
-#  Xt2=myXt2[-(1:(t2-t_rsd)),]+newRESID
-#  colnames(Xt1)=vnames
-#  colnames(Xt2)=vnames
+#  Xt1=myXt1[-(1:(t1-t_rsd)),]
+#  Xt2=myXt2[-(1:(t2-t_rsd)),]
+#  fitted=myXt1[-(1:(t1-t_rsd)),]
   colnames(newRESID)=vnames
-  results <-list(G0=G0,G1=G1,G2=G2, F1=F1,F2=F2,lagmatrix=myout$lagmatrix,RESID=RESID,newRESID=newRESID)
+  removal=dim(dataNT)[1]-dim(newRESID)[1]
+
+  dataNT=dataNT[-c(1:removal),]
+  fitted=dataNT-newRESID
+  rownames(dataNT)=rownames(fitted)=NULL
+  results <-list(G0=G0,G1=G1,G2=G2, F1=F1,F2=F2,lagmatrix=myout$lagmatrix,RESID=RESID,newRESID=newRESID,fitted=fitted,data=dataNT)
 
 } # if p=2
 
@@ -240,10 +248,7 @@ return(results)
 
 
 
-
-
-
-.GVARfilter <- function(X, p, Bcoef, exogen = NULL, postpad = c("none", "constant", "zero", "NA"))
+.GVAR_fitted <- function(X, p, Bcoef, exogen = NULL, postpad = c("none", "constant", "zero", "NA"))
 {
 	X = as.matrix(X)
 	if(any(is.na(X))) stop("\nvarxfilter:-->error: NAs in X.\n")

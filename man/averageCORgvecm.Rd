@@ -44,7 +44,7 @@ lag.max=15
 type="const"
 ic="SC"
 weight.matrix=tradeweightx
-mainOUTPUT = GVECMest(data=PriceVol,p,FLag,lag.max,type,ic,weight.matrix)
+mainOUTPUT = GVECMest(data=PriceVol,p,lag.max,type,ic,weight.matrix)
 
 cor2_avg=averageCORgvecm(out=mainOUTPUT)
 as.matrix((cor2_avg$vecmRSDcor)[[1]])

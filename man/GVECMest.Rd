@@ -8,7 +8,7 @@
 
 \description{Estimate country-specific Engle-Granger VECM in a Global VECM setting}
 
-\usage{GVECMest(data,p=2,FLag, lag.max=NULL, type="const", ic,weight.matrix=NULL)
+\usage{GVECMest(data,p=2,lag.max=NULL, type="const", ic,weight.matrix=NULL)
 }
 
 \arguments{
@@ -16,12 +16,9 @@
   Dataframe is a strictly balanced panel data format,the first column is cross-section ID,and the second column is Time. For the sake of identification, both columns must be named by, respectively, id and Time.
 }
 
- \item{p}{The number of lag for Xt matrix.
+ \item{p}{The number of lag for Xt matrix. Foreign variables are set by FLag=p+1. Current version restricts p <= 2 for simplicity, which aims at avoiding too many paramaters in low-frequency data of many variables and many countries. It will be relaxed soon.
 }
 
- \item{FLag}{The number of lag for foreign VECMiables in country-specific VECM
-
-}
 
  \item{lag.max}{The maximal number of lag for estimating country-specific VECM
 }
@@ -74,7 +71,7 @@ lag.max=15
 type="const"
 ic="SC"
 weight.matrix=tradeweightx
-mainOUTPUT = GVECMest(data=PriceVol,p,FLag,lag.max,type,ic,weight.matrix)
+mainOUTPUT = GVECMest(data=PriceVol,p,lag.max,type,ic,weight.matrix)
 
 mainOUTPUT$lagmatrix    # Country-specific GVECM lags
 mainOUTPUT$gvecm

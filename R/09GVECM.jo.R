@@ -1,6 +1,7 @@
-GVECM.jo <- function (data,p=2,FLag=3,ecdet = "const", type = "eigen",spec = "longrun", season = NULL,weight.matrix)
+GVECM.jo <- function (data,p=2,ecdet = "const", type = "eigen",spec = "longrun", season = NULL,weight.matrix)
     {
-  ID<-NULL
+FLag=p+1  
+ID<-NULL
 DIFF=TRUE
 NAME=unique(as.character(data[,"ID"]))
 endo.no=ncol(data)-2

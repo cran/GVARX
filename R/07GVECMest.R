@@ -1,9 +1,9 @@
 #dat=Data
-GVECMest <- function (data,p=2,FLag, lag.max=NULL, type="const", ic,weight.matrix=NULL){
+GVECMest <- function (data,p=2, lag.max=NULL, type="const", ic,weight.matrix=NULL){
   ID<-NULL
   lag.max =lag.max
   DIFF=c(FALSE,TRUE)[2]
-  p=p
+  FLag=p+1
   type=type
 
   idCol=which(colnames(data) == "ID")

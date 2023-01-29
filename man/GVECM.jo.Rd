@@ -9,7 +9,7 @@
 \description{Estimate country-specific Johansen test results in a Global VECM setting}
 
 \usage{
-GVECM.jo(data,p=2,FLag=3,ecdet = "const", type = "eigen",spec = "longrun",
+GVECM.jo(data,p=2,ecdet = "const", type = "eigen",spec = "longrun",
 season = NULL,weight.matrix)
 }
 
@@ -18,12 +18,9 @@ season = NULL,weight.matrix)
   Dataframe is a strictly balanced panel data format,the first column is cross-section ID,and the second column is Time. For the sake of identification, both columns must be named by, respectively, id and Time.
 }
 
- \item{p}{The number of lag for Xt matrix.
+ \item{p}{The number of lag for Xt matrix. Current version restricts p <= 2 for simplicity, which aims at avoiding too many paramaters in low-frequency data of many variables and many countries. It will be relaxed soon.
 }
 
- \item{FLag}{The number of lag for foreign VECMiables in country-specific VECM
-
-}
 
  \item{ecdet}{Character, 'none' for no intercept in cointegration, 'const' for constant term in
 cointegration and 'trend' for trend variable in cointegration.
@@ -69,7 +66,7 @@ FLag=2
 type="const"
 ic="SC"
 weight.matrix=tradeweight1
-mainOUT.JO=GVECM.jo(data=PriceVol,p=2,FLag=3, weight.matrix=weight.matrix)
+mainOUT.JO=GVECM.jo(data=PriceVol,p=2,weight.matrix=weight.matrix)
 mainOUT.JO$JO.test
 
 }

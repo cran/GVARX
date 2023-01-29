@@ -1,6 +1,7 @@
-GVARest <- function (data,p=2,FLag, lag.max=NULL, type="const", ic,weight.matrix=NULL){
+GVARest <- function (data,p=2,lag.max=NULL, type="const", ic,weight.matrix=NULL){
   ID<-NULL
 p=p
+FLag=p+1
 type=type
 
 idCol=which(colnames(data) == "ID")
@@ -98,7 +99,7 @@ return(results)
 
 #.GVARirf <- function (Obj, impulse, response,ortho,cumulative,boot,ci = 0.95,n.ahead=15, Weights,shockNeg=FALSE,STD=FALSE,G=FALSE) {
 
-#DATA=GVAR_Xt(data=Obj$datamat,p=Obj$p, weight.matrix=Obj$weight,ic="AIC")
+#DATA=GVAR_GF(data=Obj$datamat,p=Obj$p, weight.matrix=Obj$weight,ic="AIC")
 
 #type=Obj$type
 #out2=vars::VAR(DATA$Xt,p=2,type=type,lag.max =5,ic="SC")
@@ -366,7 +367,8 @@ V1=t(matrix(colnames(varRSD),var.no,))
 gvarRSD=out$gvarRSD
 V=t(matrix(colnames(gvarRSD),var.no,))
 
-varRSD.cor=list();gvarRSD.cor=list()
+varRSD.cor=list()
+gvarRSD.cor=list()
 for (j in 1:var.no) {
 temp1=(apply(cor(varRSD[,V1[,j]]),2,sum)-1)/(length(V1[,j])-1)
 varRSD.cor[[j]]=temp1

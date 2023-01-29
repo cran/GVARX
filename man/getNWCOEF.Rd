@@ -41,7 +41,7 @@ lag.max=15
 type="const"
 ic="SC"
 weight.matrix=tradeweightx
-mainOUTPUT = GVARest(data=PriceVol,p,FLag,lag.max,type,ic,weight.matrix)
+mainOUTPUT = GVARest(data=PriceVol,p,lag.max,type,ic,weight.matrix)
 COEF=getNWCOEF(out=mainOUTPUT,sheet=1)
 }
 
